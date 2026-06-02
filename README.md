@@ -11,7 +11,7 @@ Works for **any institution** registered in the eduroam CAT database (most unive
 Paste in your terminal:
 
 ```bash
-curl -fsSL https://install.linuxroam.com | bash
+curl -fsSL https://install.linuxroam.org | bash
 ```
 
 It will:
@@ -26,15 +26,15 @@ downloads the profile, installs the certificate and brings the connection up.
 
 > Prefer not to pipe into `bash`? Use the equivalent process-substitution form:
 > ```bash
-> bash <(curl -fsSL https://install.linuxroam.com)
+> bash <(curl -fsSL https://install.linuxroam.org)
 > ```
 
 ## Options
 
 ```bash
-curl -fsSL https://install.linuxroam.com | bash                       # full flow
-curl -fsSL https://install.linuxroam.com | bash -s -- --country ES    # skip country menu (CAT code)
-curl -fsSL https://install.linuxroam.com | bash -s -- --profile 595   # install a CAT profile by ID
+curl -fsSL https://install.linuxroam.org | bash                       # full flow
+curl -fsSL https://install.linuxroam.org | bash -s -- --country ES    # skip country menu (CAT code)
+curl -fsSL https://install.linuxroam.org | bash -s -- --profile 595   # install a CAT profile by ID
 ```
 
 ## What it does
@@ -83,7 +83,7 @@ years) is recommended — fields like `domain-suffix-match` and
 ## Uninstall
 
 ```bash
-curl -fsSL https://install.linuxroam.com | bash -s -- --uninstall
+curl -fsSL https://install.linuxroam.org | bash -s -- --uninstall
 ```
 
 This removes the `eduroam` connection, its NetworkManager profile and the

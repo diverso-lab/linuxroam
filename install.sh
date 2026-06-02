@@ -15,9 +15,9 @@
 # FOR A PARTICULAR PURPOSE. See the GNU GPL v3 (LICENSE file) for details.
 #
 # Usage:
-#   curl -fsSL https://install.linuxroam.com | bash
-#   curl -fsSL https://install.linuxroam.com | bash -s -- --country ES
-#   curl -fsSL https://install.linuxroam.com | bash -s -- --profile 595
+#   curl -fsSL https://install.linuxroam.org | bash
+#   curl -fsSL https://install.linuxroam.org | bash -s -- --country ES
+#   curl -fsSL https://install.linuxroam.org | bash -s -- --profile 595
 
 set -euo pipefail
 
@@ -35,10 +35,10 @@ usage() {
 LINUXROAM — eduroam installer for Linux + NetworkManager
 
 Usage:
-  curl -fsSL https://install.linuxroam.com | bash
-  curl -fsSL https://install.linuxroam.com | bash -s -- --country ES
-  curl -fsSL https://install.linuxroam.com | bash -s -- --profile 595
-  curl -fsSL https://install.linuxroam.com | bash -s -- --uninstall
+  curl -fsSL https://install.linuxroam.org | bash
+  curl -fsSL https://install.linuxroam.org | bash -s -- --country ES
+  curl -fsSL https://install.linuxroam.org | bash -s -- --profile 595
+  curl -fsSL https://install.linuxroam.org | bash -s -- --uninstall
 
 Options:
   --country XX   Skip the country menu (CAT federation code, e.g. ES, UK).
