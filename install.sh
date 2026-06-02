@@ -341,7 +341,11 @@ spin "$EAP_XML" "Downloading institution profile & certificates" \
 
 parsed=$(python3 - "$EAP_XML" <<'PY'
 import sys, xml.etree.ElementTree as ET, shlex, re
-tree = ET.parse(sys.argv[1]); root = tree.getroot()
+try:
+    tree = ET.parse(sys.argv[1]); root = tree.getroot()
+except Exception:
+    print("The downloaded profile is not a valid eap-config.", file=sys.stderr)
+    sys.exit(2)
 
 def strip_ns(tag): return re.sub(r'^\{[^}]+\}', '', tag)
 def find(node, name):
@@ -359,13 +363,23 @@ for d in find_all(idp, 'DisplayName'):
         display = (d.text or '').strip()
 
 am = find(idp, 'AuthenticationMethod')
+if am is None:
+    print("This profile has no authentication method CAT can install.", file=sys.stderr)
+    sys.exit(2)
 # Outer EAP type is the first <Type> in document order under AuthenticationMethod
-eap_type = int(find_all(am, 'Type')[0].text)
+type_nodes = [t for t in find_all(am, 'Type') if t.text and t.text.strip().isdigit()]
+if not type_nodes:
+    print("Could not read the EAP method from the profile.", file=sys.stderr)
+    sys.exit(2)
+eap_type = int(type_nodes[0].text)
 
 server_ids = [s.text.strip() for s in find_all(am, 'ServerID') if s.text]
-ca_b64 = ''
-for c in find_all(am, 'CA'):
-    if c.text: ca_b64 = ''.join(c.text.split()); break
+# Collect every CA in the chain (root + intermediates), not just the first.
+cas = [''.join(c.text.split()) for c in find_all(am, 'CA') if c.text]
+if not cas:
+    print("The profile ships no CA certificate; refusing to install without "
+          "server validation.", file=sys.stderr)
+    sys.exit(2)
 
 outer_id = ''
 oi = find(am, 'OuterIdentity')
@@ -394,12 +408,12 @@ out('EAP_TYPE', str(eap_type))
 out('REALM', realm)
 out('DISPLAY', display)
 out('SERVER_IDS', ';'.join(server_ids))
-out('CA_B64', ca_b64)
+out('CA_B64', ' '.join(cas))   # space-separated base64 blobs (no inner spaces)
 out('OUTER_ID', outer_id)
 out('INNER_TYPE', inner_type)
 out('INNER_METHOD', inner_method)
 PY
-)
+) || { echo "Error: could not read the institution profile (see message above)." >&2; exit 1; }
 eval "$parsed"
 ok_step "Selected: $DISPLAY  (realm: $REALM)"
 
@@ -494,13 +508,17 @@ spin() {  # spin "<message>" <cmd...>
 
 install -d -m 0755 "$CA_DIR"
 CA_FILE="$CA_DIR/ca.pem"
-{
-  echo "-----BEGIN CERTIFICATE-----"
-  echo "$CA_B64" | fold -w 64
-  echo "-----END CERTIFICATE-----"
-} >"$CA_FILE"
+: >"$CA_FILE"
+for b in $CA_B64; do
+  {
+    echo "-----BEGIN CERTIFICATE-----"
+    echo "$b" | fold -w 64
+    echo "-----END CERTIFICATE-----"
+  } >>"$CA_FILE"
+done
 chmod 0644 "$CA_FILE"
-ok_step "Installed CA certificate at $CA_FILE"
+CA_N=$(grep -c "BEGIN CERTIFICATE" "$CA_FILE")
+ok_step "Installed CA chain at $CA_FILE ($CA_N certificate(s))"
 
 nmcli connection delete "$CONN_NAME" >/dev/null 2>&1 || true
 
