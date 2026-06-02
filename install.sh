@@ -3,7 +3,7 @@
 # Pulls the institution profile from the eduroam CAT API and writes a clean
 # /etc/NetworkManager/system-connections/eduroam.nmconnection
 #
-# Copyright (C) 2026 David Romero
+# Copyright (C) 2026 Diverso Lab
 # Repo: https://github.com/diverso-lab/linuxroam
 # Promoted by Diverso Lab · https://www.diversolab.us.es
 #

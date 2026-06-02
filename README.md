@@ -96,6 +96,10 @@ and `/etc/eduroam`.)
 - EAP-TLS (personal-certificate-based) is not supported. Most universities use TTLS/PAP or PEAP/MSCHAPv2, which work.
 - Your institution must be registered in CAT. If it's missing, ask your IT department to publish a profile there — it's free.
 
+## Credits
+
+Built and maintained by **[Diverso Lab](https://www.diversolab.us.es)** (Universidad de Sevilla).
+
 ## License
 
-[GNU General Public License v3.0](LICENSE) © David Romero.
+[GNU General Public License v3.0](LICENSE) © Diverso Lab.
