@@ -1,5 +1,8 @@
 # linuxroam
 
+[![shellcheck](https://github.com/diverso-lab/linuxroam/actions/workflows/shellcheck.yml/badge.svg)](https://github.com/diverso-lab/linuxroam/actions/workflows/shellcheck.yml)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+
 Clean installer to join the **eduroam** Wi-Fi network on Linux with NetworkManager.
 Works for **any institution** registered in the eduroam CAT database (most universities and research centers worldwide).
 
