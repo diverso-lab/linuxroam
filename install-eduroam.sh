@@ -50,8 +50,9 @@ for i, it in enumerate(items, 1):
     print(f"{i:>4}) {it['display']}  ({it['federation']})", file=sys.stderr)
 print("Pick your country: ", file=sys.stderr, end='')
 try:
-    sel = int(input())
-except (ValueError, EOFError):
+    with open('/dev/tty') as tty:
+        sel = int(tty.readline())
+except (ValueError, EOFError, OSError):
     sys.exit(2)
 if not 1 <= sel <= len(items):
     sys.exit(2)
@@ -73,8 +74,9 @@ for i, it in enumerate(items, 1):
     print(f"{i:>4}) {it['display']}", file=sys.stderr)
 print("Pick your institution: ", file=sys.stderr, end='')
 try:
-    sel = int(input())
-except (ValueError, EOFError):
+    with open('/dev/tty') as tty:
+        sel = int(tty.readline())
+except (ValueError, EOFError, OSError):
     sys.exit(2)
 if not 1 <= sel <= len(items):
     sys.exit(2)
@@ -98,8 +100,9 @@ for i, it in enumerate(items, 1):
     print(f"{i:>4}) {name}", file=sys.stderr)
 print("This institution has multiple profiles. Pick one: ", file=sys.stderr, end='')
 try:
-    sel = int(input())
-except (ValueError, EOFError):
+    with open('/dev/tty') as tty:
+        sel = int(tty.readline())
+except (ValueError, EOFError, OSError):
     sys.exit(2)
 if not 1 <= sel <= len(items):
     sys.exit(2)
