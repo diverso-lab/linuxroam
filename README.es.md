@@ -10,30 +10,30 @@ Funciona con **cualquier institución** registrada en la base de datos de eduroa
 Copia y pega en un terminal:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/drorganvidez/install-eduroam/main/install-eduroam.sh)
+curl -fsSL https://install.linuxroam.com | bash
 ```
 
-Te pedirá:
+Hará:
 
-1. Tu país (menú).
-2. Tu institución (menú).
-3. Tu contraseña de `sudo`.
-4. Tu usuario de eduroam (normalmente `usuario@tudominio`) y la contraseña.
+1. **Detectar tu país automáticamente** (puedes cambiarlo).
+2. Dejarte **buscar tu institución** por nombre.
+3. Pedirte la contraseña de `sudo`.
+4. Pedirte tu usuario de eduroam (normalmente `usuario@tudominio`) y la contraseña.
 
-Después conecta:
+…y después **conecta solo**. Verás un progreso estilo docker mientras descarga
+el perfil, instala el certificado y levanta la conexión.
 
-```bash
-nmcli connection up eduroam
-```
-
-…o selecciona **eduroam** en el menú de Wi-Fi de GNOME/KDE.
+> ¿Prefieres no canalizar a `bash`? Usa la forma equivalente con sustitución de proceso:
+> ```bash
+> bash <(curl -fsSL https://install.linuxroam.com)
+> ```
 
 ## Opciones
 
 ```bash
-install-eduroam.sh                # menú completo: país → universidad
-install-eduroam.sh --country ES   # saltarse el menú de país (código ISO 3166)
-install-eduroam.sh --profile 595  # sin menús, instala un perfil CAT concreto
+curl -fsSL https://install.linuxroam.com | bash                       # flujo completo
+curl -fsSL https://install.linuxroam.com | bash -s -- --country ES    # saltarse el menú de país (código CAT)
+curl -fsSL https://install.linuxroam.com | bash -s -- --profile 595   # instala un perfil CAT concreto
 ```
 
 ## Qué hace

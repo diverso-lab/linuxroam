@@ -10,30 +10,30 @@ Works for **any institution** registered in the eduroam CAT database (most unive
 Paste in your terminal:
 
 ```bash
-bash <(curl -fsSL https://raw.githubusercontent.com/drorganvidez/install-eduroam/main/install-eduroam.sh)
+curl -fsSL https://install.linuxroam.com | bash
 ```
 
-You will be prompted for:
+It will:
 
-1. Your country (menu).
-2. Your institution (menu).
-3. Your `sudo` password.
-4. Your eduroam username (usually `user@yourdomain`) and password.
+1. **Auto-detect your country** (you can change it).
+2. Let you **search your institution** by name.
+3. Ask for your `sudo` password.
+4. Ask for your eduroam username (usually `user@yourdomain`) and password.
 
-Then connect:
+…then **connect automatically**. You'll see docker-style progress as it
+downloads the profile, installs the certificate and brings the connection up.
 
-```bash
-nmcli connection up eduroam
-```
-
-…or pick **eduroam** in the GNOME/KDE Wi-Fi menu.
+> Prefer not to pipe into `bash`? Use the equivalent process-substitution form:
+> ```bash
+> bash <(curl -fsSL https://install.linuxroam.com)
+> ```
 
 ## Options
 
 ```bash
-install-eduroam.sh                # full menu: country -> institution
-install-eduroam.sh --country ES   # skip country menu (ISO 3166 code)
-install-eduroam.sh --profile 595  # skip everything, install a CAT profile by ID
+curl -fsSL https://install.linuxroam.com | bash                       # full flow
+curl -fsSL https://install.linuxroam.com | bash -s -- --country ES    # skip country menu (CAT code)
+curl -fsSL https://install.linuxroam.com | bash -s -- --profile 595   # install a CAT profile by ID
 ```
 
 ## What it does
