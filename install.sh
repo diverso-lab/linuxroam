@@ -134,6 +134,47 @@ do_uninstall() {
   ok_step "Removed eduroam: connection, $NM_FILE and $CA_DIR."
 }
 
+# True when an eduroam connection already exists on this machine.
+already_configured() {
+  command -v nmcli >/dev/null 2>&1 || return 1
+  nmcli -t -f NAME connection show 2>/dev/null | grep -qx "$CONN_NAME"
+}
+
+# Print the current eduroam config (non-secret fields only).
+show_details() {
+  local id dom eap inst
+  id=$(nmcli -g 802-1x.identity          connection show "$CONN_NAME" 2>/dev/null)
+  dom=$(nmcli -g 802-1x.domain-suffix-match connection show "$CONN_NAME" 2>/dev/null)
+  eap=$(nmcli -g 802-1x.eap             connection show "$CONN_NAME" 2>/dev/null)
+  inst=""; [[ -r "$CA_DIR/institution" ]] && inst=$(cat "$CA_DIR/institution")
+  [[ -n "$inst" ]] && printf '   %sInstitution:%s %s\n' "$BLD" "$RST" "$inst" >&2
+  printf '   %sIdentity:%s    %s\n' "$BLD" "$RST" "${id:-<unknown>}" >&2
+  printf '   %sValidates:%s   %s\n' "$BLD" "$RST" "${dom:-<none>}" >&2
+  printf '   %sEAP:%s         %s\n' "$BLD" "$RST" "${eap:-<unknown>}" >&2
+}
+
+# Menu shown when eduroam is already set up. Returns 0 only if the user
+# chooses to reconfigure (so the normal install flow continues).
+manage_existing() {
+  while true; do
+    printf '\n %s✔ eduroam is already configured on this machine.%s\n' "$GRN" "$RST" >&2
+    show_details
+    printf '\n %sWhat would you like to do?%s\n' "$BLD" "$RST" >&2
+    printf '   1) Reconfigure  %s(change institution or credentials)%s\n' "$DIM" "$RST" >&2
+    printf '   2) Uninstall    %s(remove eduroam from this machine)%s\n' "$DIM" "$RST" >&2
+    printf '   3) Quit\n' >&2
+    printf '   > ' >&2
+    local choice; read -r choice </dev/tty || { printf '\n' >&2; exit 0; }
+    printf '\n' >&2
+    case "$choice" in
+      1) return 0 ;;
+      2) do_uninstall; exit 0 ;;
+      ''|3) exit 0 ;;
+      *) printf ' %s!%s pick 1, 2 or 3.\n' "$RED" "$RST" >&2 ;;
+    esac
+  done
+}
+
 # Short legal notice the user must acknowledge before anything runs.
 disclaimer() {
   printf ' %s%sBefore you continue%s\n\n' "$BLD" "$CYN" "$RST" >&2
@@ -334,6 +375,13 @@ banner
 if [[ "$UNINSTALL" -eq 1 ]]; then
   do_uninstall
   exit 0
+fi
+
+# If eduroam is already set up and this is a plain interactive run, offer a
+# management menu instead of blindly reinstalling. manage_existing only
+# returns when the user picks "Reconfigure".
+if [[ -z "$PROFILE_ID" && -z "$COUNTRY" ]] && already_configured; then
+  manage_existing
 fi
 
 disclaimer
@@ -550,6 +598,10 @@ done
 chmod 0644 "$CA_FILE"
 CA_N=$(grep -c "BEGIN CERTIFICATE" "$CA_FILE")
 ok_step "Installed CA chain at $CA_FILE ($CA_N certificate(s))"
+
+# Remember the institution name so the management menu can show it later.
+printf '%s\n' "$DISPLAY" >"$CA_DIR/institution"
+chmod 0644 "$CA_DIR/institution"
 
 nmcli connection delete "$CONN_NAME" >/dev/null 2>&1 || true
 
