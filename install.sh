@@ -425,11 +425,19 @@ PY
 # Read from /dev/tty so this works under `curl ... | bash`, where stdin
 # is the script stream rather than the keyboard.
 printf '\n' >&2
-read -rp "Username (usually user@$REALM): " USERNAME </dev/tty
+printf ' %sUsername%s — e.g. %suser@%s%s (a subdomain like %suser@…%s%s is also valid).\n' \
+  "$BLD" "$RST" "$BLD" "$REALM" "$RST" "$DIM" "$REALM" "$RST" >&2
+read -rp "   > " USERNAME </dev/tty
 [[ -z "$USERNAME" ]] && { echo "Error: empty username" >&2; exit 1; }
-if [[ -n "$REALM" && "$USERNAME" != *"@${REALM}" ]]; then
-  printf ' %s!%s your username does not end with %s@%s%s — continuing anyway.\n' \
-    "$RED" "$RST" "$BLD" "$REALM" "$RST" >&2
+# Accept user@REALM and any subdomain user@<sub>.REALM (e.g. alum.us.es).
+userdomain="${USERNAME##*@}"
+if [[ -n "$REALM" && "$USERNAME" == *"@"* \
+      && "$userdomain" != "$REALM" && "$userdomain" != *".$REALM" ]]; then
+  printf ' %s!%s your domain (%s%s%s) is not under %s%s%s — continuing anyway.\n' \
+    "$RED" "$RST" "$BLD" "$userdomain" "$RST" "$BLD" "$REALM" "$RST" >&2
+elif [[ "$USERNAME" != *"@"* ]]; then
+  printf ' %s!%s no %s@domain%s in your username — continuing anyway.\n' \
+    "$RED" "$RST" "$BLD" "$RST" >&2
 fi
 read -rsp "Password: " PASSWORD </dev/tty; echo >&2
 [[ -z "$PASSWORD" ]] && { echo "Error: empty password" >&2; exit 1; }
