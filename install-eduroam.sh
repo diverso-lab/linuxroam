@@ -295,5 +295,11 @@ nmcli connection reload
 
 echo
 echo "Done. Connection '$CONN_NAME' created for $USERNAME ($DISPLAY)."
-echo "To connect now:  nmcli connection up $CONN_NAME"
+echo "Connecting now..."
+if nmcli connection up "$CONN_NAME"; then
+  echo "Connected to $CONN_NAME."
+else
+  echo "Could not connect automatically (out of range?)." >&2
+  echo "It will connect on its own when in range, or run:  nmcli connection up $CONN_NAME" >&2
+fi
 ROOT
