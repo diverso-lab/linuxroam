@@ -3,8 +3,16 @@
 # Pulls the institution profile from the eduroam CAT API and writes a clean
 # /etc/NetworkManager/system-connections/eduroam.nmconnection
 #
-# Open source (MIT) · https://github.com/drorganvidez/install-eduroam
+# Copyright (C) 2026 David Romero
+# Repo: https://github.com/drorganvidez/install-eduroam
 # Promoted by Diverso Lab · https://www.diversolab.us.es
+#
+# This program is free software: you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by the
+# Free Software Foundation, either version 3 of the License, or (at your
+# option) any later version. This program is distributed WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE. See the GNU GPL v3 (LICENSE file) for details.
 #
 # Usage:
 #   curl -fsSL https://install.linuxroam.com | bash
@@ -66,7 +74,7 @@ banner() {
 BANNER
   printf '%s' "$RST" >&2
   printf '%s  eduroam on Linux — one command, no GUI clicking%s\n\n' "$DIM" "$RST" >&2
-  printf '  %sOpen source%s%s · MIT%s\n' "$BLD" "$RST" "$DIM" "$RST" >&2
+  printf '  %sOpen source%s%s · GNU GPLv3%s\n' "$BLD" "$RST" "$DIM" "$RST" >&2
   printf '  %sRepo:%s        https://github.com/drorganvidez/install-eduroam\n' "$BLD" "$RST" >&2
   printf '  %sPromoted by:%s Diverso Lab — https://www.diversolab.us.es\n' "$BLD" "$RST" >&2
   printf '  %sData source:%s eduroam CAT (cat.eduroam.org)\n\n' "$BLD" "$RST" >&2

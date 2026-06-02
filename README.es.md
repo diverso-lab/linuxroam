@@ -63,3 +63,7 @@ sudo rm -rf /etc/eduroam
 
 - EAP-TLS (autenticación con certificado personal) no está soportado. La mayoría de universidades usan TTLS/PAP o PEAP/MSCHAPv2, que sí funcionan.
 - Tu institución tiene que estar registrada en CAT. Si no está, pídele a tu departamento de informática que suba el perfil — es gratis.
+
+## Licencia
+
+[Licencia Pública General de GNU v3.0](LICENSE) © David Romero.
