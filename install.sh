@@ -4,7 +4,7 @@
 # /etc/NetworkManager/system-connections/eduroam.nmconnection
 #
 # Copyright (C) 2026 David Romero
-# Repo: https://github.com/drorganvidez/install-eduroam
+# Repo: https://github.com/diverso-lab/linuxroam
 # Promoted by Diverso Lab · https://www.diversolab.us.es
 #
 # This program is free software: you can redistribute it and/or modify it
@@ -75,7 +75,7 @@ BANNER
   printf '%s' "$RST" >&2
   printf '%s  eduroam on Linux — one command, no GUI clicking%s\n\n' "$DIM" "$RST" >&2
   printf '  %sOpen source%s%s · GNU GPLv3%s\n' "$BLD" "$RST" "$DIM" "$RST" >&2
-  printf '  %sRepo:%s        https://github.com/drorganvidez/install-eduroam\n' "$BLD" "$RST" >&2
+  printf '  %sRepo:%s        https://github.com/diverso-lab/linuxroam\n' "$BLD" "$RST" >&2
   printf '  %sPromoted by:%s Diverso Lab — https://www.diversolab.us.es\n' "$BLD" "$RST" >&2
   printf '  %sData source:%s eduroam CAT (cat.eduroam.org)\n\n' "$BLD" "$RST" >&2
 }
