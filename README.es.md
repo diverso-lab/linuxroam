@@ -46,10 +46,39 @@ curl -fsSL https://install.linuxroam.com | bash -s -- --profile 595   # instala 
   - Contraseña guardada (sin reprompts).
 - Borra cualquier perfil `eduroam` previo para evitar duplicados y recarga NetworkManager.
 
-## Requisitos
+## Compatibilidad
 
-- Distribución Linux con **NetworkManager** (Ubuntu, Fedora, Debian, Arch con GNOME/KDE…).
-- `nmcli`, `curl`, `python3`, `uuidgen` (todos preinstalados en cualquier escritorio moderno).
+El único requisito imprescindible es **NetworkManager**: el instalador
+escribe un perfil `.nmconnection` y usa `nmcli`. Es independiente de la
+arquitectura (no compila nada; solo bash + python + curl).
+
+**✅ Funciona en cualquier distro que use NetworkManager**, que es lo
+normal en escritorio:
+
+- Ubuntu, Linux Mint, Pop!_OS, elementary…
+- Fedora, openSUSE
+- Debian (GNOME/KDE)
+- Arch, Manjaro, EndeavourOS…
+
+**❌ *No* funciona donde no hay NetworkManager:**
+
+- Ubuntu Server / imágenes cloud (netplan + systemd-networkd)
+- Configuraciones con `systemd-networkd` puro, `connman`, `wicd` o `wpa_supplicant` a pelo
+- Sistemas mínimos/headless (p. ej. Alpine por defecto)
+
+El script lo comprueba al principio y sale con un mensaje claro en lugar
+de romperse a medias.
+
+### Requisitos
+
+- **NetworkManager** (`nmcli`).
+- `bash`, `curl`, `python3`, `uuidgen` (`uuid-runtime` / `util-linux`), `sudo`.
+
+Todos preinstalados en cualquier escritorio moderno; en sistemas mínimos
+puede que tengas que instalar `bash` o `uuidgen`. Se recomienda un
+NetworkManager reciente (de los últimos años): campos como
+`domain-suffix-match` y `addr-gen-mode=default` necesitan NM ≥ 1.2 y
+≥ 1.40 respectivamente.
 
 ## Desinstalar
 

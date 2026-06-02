@@ -46,10 +46,38 @@ curl -fsSL https://install.linuxroam.com | bash -s -- --profile 595   # install 
   - Password stored (no reprompts).
 - Removes any previous `eduroam` profile to avoid duplicates and reloads NetworkManager.
 
-## Requirements
+## Compatibility
 
-- Linux distribution with **NetworkManager** (Ubuntu, Fedora, Debian, Arch with GNOME/KDE…).
-- `nmcli`, `curl`, `python3`, `uuidgen` (all preinstalled on any modern desktop distro).
+The only hard requirement is **NetworkManager** — the installer writes an
+`.nmconnection` profile and drives `nmcli`. It's architecture-independent
+(no compiled code, just bash + python + curl).
+
+**✅ Works on any distro that uses NetworkManager**, which is the norm on
+the desktop:
+
+- Ubuntu, Linux Mint, Pop!_OS, elementary…
+- Fedora, openSUSE
+- Debian (GNOME/KDE)
+- Arch, Manjaro, EndeavourOS…
+
+**❌ Does *not* work where there is no NetworkManager:**
+
+- Ubuntu Server / cloud images (netplan + systemd-networkd)
+- Plain `systemd-networkd`, `connman`, `wicd`, or raw `wpa_supplicant` setups
+- Minimal/headless systems (e.g. Alpine by default)
+
+The script checks this up front and exits with a clear message instead of
+half-failing.
+
+### Requirements
+
+- **NetworkManager** (`nmcli`).
+- `bash`, `curl`, `python3`, `uuidgen` (`uuid-runtime` / `util-linux`), `sudo`.
+
+All preinstalled on any modern desktop distro; on minimal systems you may
+need to install `bash` or `uuidgen`. A recent NetworkManager (last few
+years) is recommended — fields like `domain-suffix-match` and
+`addr-gen-mode=default` need NM ≥ 1.2 / ≥ 1.40 respectively.
 
 ## Uninstall
 
