@@ -1,4 +1,4 @@
-# install-eduroam
+# linuxroam
 
 Clean installer to join the **eduroam** Wi-Fi network on Linux with NetworkManager.
 Works for **any institution** registered in the eduroam CAT database (most universities and research centers worldwide).

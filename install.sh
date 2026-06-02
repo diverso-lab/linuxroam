@@ -96,13 +96,13 @@ spin() {
   "$@" >"$out" 2>/dev/null &
   local pid=$! frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' i=0
   while kill -0 "$pid" 2>/dev/null; do
-    printf '\r %s%s%s %s ' "$CYN" "${frames:i++%${#frames}:1}" "$RST" "$msg" >&2
+    printf '\r\033[K %s%s%s %s' "$CYN" "${frames:i++%${#frames}:1}" "$RST" "$msg" >&2
     sleep 0.08
   done
   if wait "$pid"; then
-    printf '\r %s✔%s %s   \n' "$GRN" "$RST" "$msg" >&2; return 0
+    printf '\r\033[K %s✔%s %s\n' "$GRN" "$RST" "$msg" >&2; return 0
   else
-    printf '\r %s✗%s %s   \n' "$RED" "$RST" "$msg" >&2; return 1
+    printf '\r\033[K %s✗%s %s\n' "$RED" "$RST" "$msg" >&2; return 1
   fi
 }
 
@@ -139,26 +139,35 @@ items = sorted(data.get('data', []), key=lambda x: x['display'].lower())
 if not items:
     print("No countries returned by CAT API.", file=sys.stderr); sys.exit(2)
 
+tty_out = sys.stderr.isatty()
+def c(code): return code if tty_out else ''
+BLD, CYN, GRN, DIM, RST = (c('\033[1m'), c('\033[36m'), c('\033[32m'),
+                           c('\033[2m'), c('\033[0m'))
+
 det_idx = next((i for i, it in enumerate(items)
                 if it['federation'].upper() == detected), None)
 
 for i, it in enumerate(items, 1):
-    mark = '  <- detected' if det_idx == i - 1 else ''
+    mark = f'  {GRN}← detected{RST}' if det_idx == i - 1 else ''
     print(f"{i:>4}) {it['display']}  ({it['federation']}){mark}", file=sys.stderr)
 
 if det_idx is not None:
     d = items[det_idx]
-    print(f"\nDetected location: {d['display']} ({d['federation']}).", file=sys.stderr)
-    print("Press Enter to accept, or type a number to change it: ", file=sys.stderr, end='')
+    print(f"\n {GRN}✔{RST} We think you're in "
+          f"{BLD}{d['display']} ({d['federation']}){RST}.", file=sys.stderr)
+    print(f"   {BLD}Press [Enter] to use it{RST}, "
+          f"{DIM}or type another number from the list:{RST}", file=sys.stderr)
+    print("   > ", file=sys.stderr, end='')
 else:
-    print("Pick your country: ", file=sys.stderr, end='')
+    print(f"\n {BLD}Type the number of your country:{RST} ", file=sys.stderr, end='')
 
 try:
     with open('/dev/tty') as tty:
         raw = tty.readline()
 except OSError:
     sys.exit(2)
-if raw == '':            # real EOF
+print('', file=sys.stderr)   # leave the prompt line cleanly
+if raw == '':                # real EOF
     sys.exit(2)
 line = raw.strip()
 if line == '' and det_idx is not None:
@@ -192,14 +201,24 @@ try:
 except OSError:
     sys.exit(2)
 
+tty_out = sys.stderr.isatty()
+def c(code): return code if tty_out else ''
+BLD, DIM, RST = c('\033[1m'), c('\033[2m'), c('\033[0m')
+
 def show(lst):
     for i, it in enumerate(lst, 1):
         print(f"{i:>4}) {it['display']}", file=sys.stderr)
 
+def chosen(idp):
+    print('', file=sys.stderr)   # leave the prompt line cleanly
+    print(idp); sys.exit(0)
+
 current = items
 show(current)
-print(f"\n{len(items)} institutions. Type part of a name to search, "
-      "or a number to pick: ", file=sys.stderr, end='')
+print(f"\n {BLD}{len(items)} institutions.{RST} "
+      f"{DIM}Type part of the name to search, or its number to pick:{RST}",
+      file=sys.stderr)
+print("   > ", file=sys.stderr, end='')
 
 while True:
     raw = tty.readline()
@@ -208,26 +227,28 @@ while True:
     line = raw.strip()
     if line == '':
         if len(current) == 1:
-            print(current[0]['idp']); sys.exit(0)
-        print("Type a number or a search term: ", file=sys.stderr, end=''); continue
+            chosen(current[0]['idp'])
+        print("   > ", file=sys.stderr, end=''); continue
     if line.isdigit():
         sel = int(line)
         if 1 <= sel <= len(current):
-            print(current[sel - 1]['idp']); sys.exit(0)
-        print("Out of range. Try again: ", file=sys.stderr, end=''); continue
+            chosen(current[sel - 1]['idp'])
+        print(f"   {DIM}out of range — try again:{RST} > ", file=sys.stderr, end=''); continue
     q = line.lower()
     filtered = [it for it in items if q in it['display'].lower()]
     if not filtered:
-        print(f"No match for '{line}'. Try another search, or a number: ",
+        print(f"   {DIM}no match for '{line}' — search again, or type a number:{RST} > ",
               file=sys.stderr, end=''); continue
     current = filtered
+    print('', file=sys.stderr)
     show(current)
     if len(current) == 1:
-        print("\n1 match. Press Enter to pick it, or search again: ",
-              file=sys.stderr, end='')
+        print(f"\n {BLD}1 match.{RST} {DIM}Press [Enter] to pick it, "
+              f"or search again:{RST}", file=sys.stderr)
     else:
-        print(f"\n{len(current)} matches. Type a number to pick, "
-              "or refine the search: ", file=sys.stderr, end='')
+        print(f"\n {BLD}{len(current)} matches.{RST} {DIM}Type its number to pick, "
+              f"or refine the search:{RST}", file=sys.stderr)
+    print("   > ", file=sys.stderr, end='')
 PY
 }
 
@@ -245,13 +266,19 @@ if not items:
     print("The selected institution has no profile in CAT.", file=sys.stderr); sys.exit(2)
 if len(items) == 1:
     print(items[0]['profile']); sys.exit(0)
+tty_out = sys.stderr.isatty()
+BLD = '\033[1m' if tty_out else ''
+RST = '\033[0m' if tty_out else ''
 for i, it in enumerate(items, 1):
     name = it.get('display') or it.get('idp_name') or it['profile']
     print(f"{i:>4}) {name}", file=sys.stderr)
-print("This institution has multiple profiles. Pick one: ", file=sys.stderr, end='')
+print(f"\n {BLD}This institution has several profiles. Type its number:{RST} ",
+      file=sys.stderr, end='')
 try:
     with open('/dev/tty') as tty:
-        sel = int(tty.readline())
+        raw = tty.readline()
+    print('', file=sys.stderr)   # leave the prompt line cleanly
+    sel = int(raw)
 except (ValueError, EOFError, OSError):
     sys.exit(2)
 if not 1 <= sel <= len(items):
@@ -433,11 +460,11 @@ spin() {  # spin "<message>" <cmd...>
   "$@" >/dev/null 2>&1 &
   local pid=$! frames='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏' i=0
   while kill -0 "$pid" 2>/dev/null; do
-    printf '\r %s%s%s %s ' "$CYN" "${frames:i++%${#frames}:1}" "$RST" "$msg" >&2
+    printf '\r\033[K %s%s%s %s' "$CYN" "${frames:i++%${#frames}:1}" "$RST" "$msg" >&2
     sleep 0.08
   done
-  if wait "$pid"; then printf '\r %s✔%s %s   \n' "$GRN" "$RST" "$msg" >&2; return 0
-  else printf '\r %s✗%s %s   \n' "$RED" "$RST" "$msg" >&2; return 1; fi
+  if wait "$pid"; then printf '\r\033[K %s✔%s %s\n' "$GRN" "$RST" "$msg" >&2; return 0
+  else printf '\r\033[K %s✗%s %s\n' "$RED" "$RST" "$msg" >&2; return 1; fi
 }
 
 install -d -m 0755 "$CA_DIR"
