@@ -28,6 +28,7 @@ NM_FILE="/etc/NetworkManager/system-connections/${CONN_NAME}.nmconnection"
 
 COUNTRY=""
 PROFILE_ID=""
+UNINSTALL=0
 
 usage() {
   cat >&2 <<'USAGE'
@@ -37,10 +38,12 @@ Usage:
   curl -fsSL https://install.linuxroam.com | bash
   curl -fsSL https://install.linuxroam.com | bash -s -- --country ES
   curl -fsSL https://install.linuxroam.com | bash -s -- --profile 595
+  curl -fsSL https://install.linuxroam.com | bash -s -- --uninstall
 
 Options:
   --country XX   Skip the country menu (CAT federation code, e.g. ES, UK).
   --profile N    Skip everything and install CAT profile id N.
+  --uninstall    Remove the eduroam connection, profile and certificates.
   -h, --help     Show this help.
 USAGE
 }
@@ -49,6 +52,7 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
     --country) COUNTRY="$2"; shift 2 ;;
     --profile) PROFILE_ID="$2"; shift 2 ;;
+    --uninstall) UNINSTALL=1; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown argument: $1" >&2; usage; exit 1 ;;
   esac
@@ -108,6 +112,27 @@ spin() {
 
 # Instant status line (for fast, non-blocking steps).
 ok_step() { printf ' %s✔%s %s\n' "$GRN" "$RST" "$1" >&2; }
+
+# Remove the eduroam connection, NM profile and CA certificates.
+do_uninstall() {
+  local SUDO=""; [[ $EUID -ne 0 ]] && SUDO="sudo"
+  local have_nm=0; command -v nmcli >/dev/null 2>&1 && have_nm=1
+  local found=0
+  if [[ $have_nm -eq 1 ]] && nmcli -t -f NAME connection show 2>/dev/null | grep -qx "$CONN_NAME"; then
+    found=1
+  fi
+  [[ -e "$NM_FILE" || -e "$CA_DIR" ]] && found=1
+  if [[ $found -eq 0 ]]; then
+    ok_step "Nothing to remove — eduroam is not configured by this tool."
+    return 0
+  fi
+  [[ $EUID -ne 0 ]] && printf ' %s•%s Root privileges required — asking sudo...\n' "$CYN" "$RST" >&2
+  [[ $have_nm -eq 1 ]] && $SUDO nmcli connection delete "$CONN_NAME" >/dev/null 2>&1 || true
+  $SUDO rm -f "$NM_FILE"
+  $SUDO rm -rf "$CA_DIR"
+  [[ $have_nm -eq 1 ]] && $SUDO nmcli connection reload >/dev/null 2>&1 || true
+  ok_step "Removed eduroam: connection, $NM_FILE and $CA_DIR."
+}
 
 # Short legal notice the user must acknowledge before anything runs.
 disclaimer() {
@@ -305,6 +330,12 @@ PY
 
 # --- banner, disclaimer & preflight --------------------------------
 banner
+
+if [[ "$UNINSTALL" -eq 1 ]]; then
+  do_uninstall
+  exit 0
+fi
+
 disclaimer
 
 missing=()

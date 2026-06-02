@@ -3,8 +3,6 @@
 Clean installer to join the **eduroam** Wi-Fi network on Linux with NetworkManager.
 Works for **any institution** registered in the eduroam CAT database (most universities and research centers worldwide).
 
-🇪🇸 [Léelo en español](README.es.md)
-
 ## One-line install
 
 Paste in your terminal:
@@ -82,10 +80,13 @@ years) is recommended — fields like `domain-suffix-match` and
 ## Uninstall
 
 ```bash
-sudo nmcli connection delete eduroam
-sudo rm -f /etc/NetworkManager/system-connections/eduroam.nmconnection
-sudo rm -rf /etc/eduroam
+curl -fsSL https://install.linuxroam.com | bash -s -- --uninstall
 ```
+
+This removes the `eduroam` connection, its NetworkManager profile and the
+installed certificates. (Equivalent manual steps: `sudo nmcli connection
+delete eduroam`, then remove `/etc/NetworkManager/system-connections/eduroam.nmconnection`
+and `/etc/eduroam`.)
 
 ## Caveats
 
