@@ -109,6 +109,22 @@ spin() {
 # Instant status line (for fast, non-blocking steps).
 ok_step() { printf ' %s✔%s %s\n' "$GRN" "$RST" "$1" >&2; }
 
+# Short legal notice the user must acknowledge before anything runs.
+disclaimer() {
+  printf ' %s%sBefore you continue%s\n\n' "$BLD" "$CYN" "$RST" >&2
+  printf '   %s•%s This installs an %seduroam%s Wi-Fi profile and stores your\n' "$CYN" "$RST" "$BLD" "$RST" >&2
+  printf '     password locally in NetworkManager (a root-only file).\n' >&2
+  printf '   %s•%s Your institution profile is fetched from the official\n' "$CYN" "$RST" >&2
+  printf '     %seduroam CAT%s (cat.eduroam.org). Use only your own credentials\n' "$BLD" "$RST" >&2
+  printf '     and follow your institution'"'"'s acceptable-use policy.\n' >&2
+  printf '   %s•%s Provided %sas is%s, without warranty, under the %sGNU GPLv3%s.\n' "$CYN" "$RST" "$BLD" "$RST" "$BLD" "$RST" >&2
+  printf '     Not affiliated with or endorsed by eduroam, GÉANT or your\n' >&2
+  printf '     institution.\n\n' >&2
+  printf '   %sPress [Enter] to accept and continue, or Ctrl+C to cancel.%s ' "$DIM" "$RST" >&2
+  read -r _ </dev/tty || { printf '\n' >&2; exit 130; }
+  printf '\n' >&2
+}
+
 api_get() { curl -fsSL --max-time 20 "${CAT_API}?$1"; }
 
 # Best-effort guess of the user's country (ISO 3166-1 alpha-2) from their
@@ -287,8 +303,9 @@ print(items[sel-1]['profile'])
 PY
 }
 
-# --- banner & preflight --------------------------------------------
+# --- banner, disclaimer & preflight --------------------------------
 banner
+disclaimer
 
 missing=()
 for c in nmcli python3 curl uuidgen; do
